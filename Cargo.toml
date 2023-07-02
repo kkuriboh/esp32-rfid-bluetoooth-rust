@@ -1,0 +1,17 @@
+[package]
+name = "mcu"
+version = "0.1.0"
+authors = ["Augusto Pieper <augustoopieper@gmail.com>"]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+lto = "off"
+
+[dependencies]
+bleps = { git = "https://github.com/bjoernQ/bleps", package = "bleps", rev = "b82f1e7009bef7e32f0918be5b186188aa5e7109", features = ["macros"] }
+esp-backtrace = { version = "0.7.0", features = ["esp32", "panic-handler", "exception-handler", "print-uart"] }
+esp-println = { version = "0.5.0", features = ["esp32"] }
+esp-wifi = { git = "https://github.com/esp-rs/esp-wifi", package = "esp-wifi", ref = "c570f674610479fc5e070c8db6d181b73ddf60a8" , features = ["esp32", "ble"] }
+fugit = "0.3.7"
+hal = { package = "esp32-hal", version = "0.12.0" }
+mfrc522 = "0.6.0"
