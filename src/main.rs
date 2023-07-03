@@ -20,7 +20,7 @@ use hal::{
     xtensa_lx::mutex::{CriticalSectionMutex, Mutex},
     Delay, Spi,
 };
-use mfrc522::{comm::eh02::spi::SpiInterface, Mfrc522};
+use mfrc522::{comm::eh02::spi::SpiInterface, Initialized, Mfrc522};
 
 #[entry]
 fn main() -> ! {
@@ -48,7 +48,7 @@ fn main() -> ! {
     );
 
     let itf = SpiInterface::new(spi);
-    let mut reader = Mfrc522::new(itf).init().unwrap();
+    let mut reader: Mfrc522<_, Initialized> = Mfrc522::new(itf).init().unwrap();
 
     let init = initialize(
         EspWifiInitFor::Ble,
@@ -102,12 +102,16 @@ fn main() -> ! {
                 Ok(atqa) => {
                     if let Ok(uid) = reader.select(&atqa) {
                         let uid = uid.as_bytes();
-                        size = uid.len();
+                        let uid_len = uid.len();
+                        assert!(data.len() >= uid_len);
+
+                        size = uid_len;
                         data.copy_from_slice(uid);
                     }
                 }
                 Err(err) => println!("{err:#?}"),
             });
+
             size
         };
 
@@ -116,6 +120,7 @@ fn main() -> ! {
             let mut formatted_data = [0; 16];
             formatted_data.copy_from_slice(data);
             (&reader).lock(|reader| {
+                // TODO: test this, idk if mf_write is supposed to work like this
                 if let Err(err) = reader.mf_write(0, formatted_data) {
                     println!("{err:?}");
                 }
